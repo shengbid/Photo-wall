@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="./css/index.css">
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+  <div class="meaasge_contanier">
+    <ul class="picture_list">
+      <div class="upload">
+        <div class="plus">添加照片</div>
+        <!-- <input id="filebtn" type="file" accept="image/gif, image/jpeg"> -->
+      </div>
+    </ul>
+  </div>
+</body>
+<script src="./img.js"></script>
+<script type="text/javascript">
+  $(function () {
+    // 如果有后台图片接口,可以使用文件上传
+    // $('.plus').on('click', function (e) {
+    //   if ($('#filebtn')) {
+    //     $('#filebtn').click()
+    //   }
+    //   e.preventDefault()
+    // })
+    // $('#filebtn').change(function () {
+    //   const file = $('#filebtn')[0].files
+    //   console.log(777, file)
+    // })
+
+    // 添加图片
+    $('.plus').click(function () {
+      const liList = $('.picture_list .item')
+      if (liList && liList.length > 30) {
+        window.alert('图片太多啦,先删掉一些图片')
+        return
+      }
+      // 准备了7张图片,这里生成0-6的随机数,用于取图
+      let index = Math.round(Math.random() * 10)
+      if (index > 6) {
+        index = Math.round(index * 0.6)
+      }
+      // 设置初始的top和left值
+      let liTop = 150
+      let liLeft = 100
+      if (liList && liList.length) {
+        // 获取最后一个li的位置
+        let lastLi = $('.picture_list li:last-child')
+        let t = Number(lastLi.css('top').replace('px', ''))
+        let l = Number(lastLi.css('left').replace('px', ''))
+        console.log(lastLi, t, l)
+        // 图片边界判断,让生成的图片位置在一定范围
+        l = l < 100 ? 100 : l
+        l = l > contanier.width() - lastLi.width() - 100 ? 100 : l
+        t = t < 100 ? 100 : t
+        t = t > contanier.height() - lastLi.height() - 100 ? 100 : t
+        // 每次图片都在上一张的基础上排列
+        liTop = t + 30
+        liLeft = l + 30
+        // 一开始没做图片移动,写了一个图片心型排列方法
+        // let length = liList.length
+        // if (length < 9) { // 右下走向
+        //   liTop = t + 30
+        //   liLeft = l + 30
+        // } else if (length > 8 && length < 17) { // 右上走向
+        //   liTop = t - 30
+        //   liLeft = l + 30
+        // } else if (length > 16 && length < 23) { // 左下走向
+        //   if (length === 17) {
+        //     liLeft = l - 60
+        //   } else liLeft = l - 30
+        //   liTop = t + 30
+        // } else if (length > 22) { // 左上走向
+        //   liTop = t - 30
+        //   liLeft = l - 30
+        // }
+      }
+      // console.log(index, liList)
+      // 生成一个图片
+      const url = list[index].url
+      if (!liList || liList.length < 31) {
+        const li = $(`<li class="item"><div class="delete">x</div><img src="${url}" /></li>`).css({
+          'top': liTop,
+          'left': liLeft
+        })
+        $('.picture_list').append(li)
+      }
+    })
+
+    // 图片移动
+    let pictureList = $('.picture_list')
+    let contanier = $('.meaasge_contanier')
+    pictureList.on('mousedown', '.item', function (e) {
+      e.preventDefault()
+      // 让点击的图片在第一层级
+      let arr = Array.from($('.item'))
+      arr.forEach(item => {
+        $(item).css({
+          zIndex: 0
+        })
+      })
+      let item = $(this)
+      $(item).css({
+        zIndex: 99
+      })
+      // 获取当前位置的clientX,和当前图片的top值,left值,得到它们相减部分的值
+      const disX = e.clientX - item[0].offsetLeft
+      const disY = e.clientY - item[0].offsetTop
+
+      contanier.mousemove(function (event) {
+        event.preventDefault()
+        // 用移动时的位置的clientX减去初始的差值,就得到现在的top值与left值
+        let x = event.clientX - disX
+        let y = event.clientY - disY
+        x = x < 0 ? 0 : x
+        x = x > contanier.width() - item.width() ? contanier.width() - item.width() : x
+        y = y < 0 ? 0 : y
+        y = y > contanier.height() - item.height() ? contanier.height() - item.height() : y
+        item.css({
+          top: y,
+          left: x
+        })
+      })
+      // 鼠标移出盒子停止图片移动
+      contanier.mouseout(function () {
+        contanier.off('mousemove')
+        contanier.off('mouseup')
+      })
+      // 鼠标弹起停止图片移动
+      contanier.mouseup(function () {
+        contanier.off('mousemove')
+        contanier.off('mouseup')
+      })
+    })
+
+    // 图片删除
+    pictureList.on('click', '.delete', function () {
+      // 删除当前点击的图片
+      $(this).parent('.item').remove()
+    })
+    // 鼠标移入,删除按钮展示
+    pictureList.on('mouseover', '.item', function () {
+      $(this).children('.delete').show()
+    })
+    // 鼠标移出,删除按钮隐藏
+    pictureList.on('mouseout', '.item', function () {
+      $(this).children('.delete').hide()
+    })
+  })
+</script>
+</html>
